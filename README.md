@@ -34,8 +34,8 @@ remesher = IsotropicRemesher(model)
 
 # apply remeshing
 remesher.isotropic_remeshing(
-    .15, # L_target, 
-    iter=10, 
+    .14, # L_target, 
+    iter=20, 
     explicit=True, 
     foldover=10, # degrees
     sliver=True
@@ -44,13 +44,28 @@ remesher.isotropic_remeshing(
 ```
 ### Examples
 
-In all cases ```iter = 10```.
+In all cases ```L = .14```, ```iter = 20``` and the following surface as input:
 
-**Case I**: ```explicit = False```, ```foldover = 0``` and ```sliver = False```
+<img src="export/sphere_input.png" alt="drawing" width="400"/>
+
+**Case 0**: ```explicit = False```, ```foldover = 0``` and ```sliver = False```
+
 <img src="export/sphere_0.png" alt="drawing" width="400"/>
-**Case II**: ```explicit = True```, ```foldover = 0``` and ```sliver = False```. The fixed vertices promoted self-intertersections.
+
+**Case 1**: ```explicit = False```, ```foldover = 0``` and ```sliver = True```. 
+
+<img src="export/sphere_4.png" alt="drawing" width="400"/>
+
+**Case 2**: ```explicit = True```, ```foldover = 0``` and ```sliver = False```. The fixed vertices promoted self-intertersections.
+
 <img src="export/sphere_1.png" alt="drawing" width="400"/>
-**Case III**: ```explicit = True```, ```foldover = 10``` and ```sliver = False```. The foldover parameter help us to avoid the self-intersections.
+
+**Case 3**: ```explicit = True```, ```foldover = 10``` and ```sliver = False```. The foldover parameter help us to avoid the self-intersections.
+
 <img src="export/sphere_2.png" alt="drawing" width="400"/>
-**Case IV**: ```explicit = True```, ```foldover = 10``` and ```sliver = True```. The sliver parameter enhance the compactness of the triangles.
+
+**Case 4**: ```explicit = True```, ```foldover = 10``` and ```sliver = True```. The sliver parameter enhance the compactness of the triangles.
+
 <img src="export/sphere_3.png" alt="drawing" width="400"/>
+
+
