@@ -11,9 +11,9 @@ remesher = IsotropicRemesher(mesh)
 remesher.isotropic_remeshing(
     .14, 
     iter=20, 
-    explicit=True, 
-    foldover=10,
-    sliver=False
+    explicit=False, 
+    foldover=0,
+    sliver=True
 )
 
 remesher.model.clean()
@@ -26,4 +26,4 @@ geometric_plotter.plot_trisurf(ax, np.asarray(remesher.model.vertices), np.asarr
 
 geometric_plotter.config_ax(ax, (50,50,0), 1.5)
 
-geometric_plotter.execute(folder='E:\Repositorios\isotropic_remesher\export\\', name='sphere_2')
+geometric_plotter.execute(folder='E:\Repositorios\isotropic_remesher\export\\', name='sphere_4')
