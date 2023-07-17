@@ -7,3 +7,6 @@ dist/
 etc/
 __pycache__
 .vscode/
+*.eps
+*.pdf
+
