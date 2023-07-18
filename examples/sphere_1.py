@@ -10,13 +10,13 @@ mesh = HalfEdgeModel(sphere.vertices, sphere.triangles)
 remesher = IsotropicRemesher(mesh)
 remesher.isotropic_remeshing(
     .14, 
-    iter=20, 
-    explicit=True, 
-    foldover=0,
+    iter=10, 
+    explicit=False, 
+    foldover=10,
     sliver=False
 )
 
-remesher.model.clean()
+remesher.model.topology_checker(clean=True)
 
 geometric_plotter.set_export()
 
