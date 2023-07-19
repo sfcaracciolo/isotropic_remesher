@@ -15,8 +15,8 @@ sphere_triangle_mesh, indices = triangle_mesh_by_convex_hull_of_inner_sphere(ver
 new_vertices = Vector3dVector(nodes[indices])
 pig_triangle_mesh = TriangleMesh(new_vertices, sphere_triangle_mesh.triangles)
 
-mesh = HalfEdgeModel(pig_triangle_mesh.vertices, pig_triangle_mesh.triangles)
-remesher = IsotropicRemesher(mesh)
+model = HalfEdgeModel(pig_triangle_mesh.vertices, pig_triangle_mesh.triangles)
+remesher = IsotropicRemesher(model)
 
 L_min, L_mean, L_max = utils.compute_len_stats(pig_triangle_mesh.vertices)
 print(f'L min = {L_min:.2f} L mean = {L_mean:.2f} L max = {L_max:.2f}')
@@ -32,7 +32,6 @@ remesher.isotropic_remeshing(
     sliver=True
 )
 
-mesh.clean()
-_triangle_mesh = TriangleMesh(mesh.vertices, mesh.triangles)
-old_vertices = PointCloud(vertices)
-draw_geometries([old_vertices, _triangle_mesh], mesh_show_back_face=True, mesh_show_wireframe=True) 
+model.clean()
+_triangle_mesh = TriangleMesh(model.vertices, model.triangles)
+draw_geometries([PointCloud(vertices), _triangle_mesh], mesh_show_back_face=True, mesh_show_wireframe=True) 
