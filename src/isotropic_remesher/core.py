@@ -1,6 +1,7 @@
+import statistics
 import numpy as np 
 from half_edge import HalfEdgeModel
-import vector_tools
+from vector_tools import BiPoint, TriPoint
 import geometric_tools
 from open3d.utility import Vector3dVector
 from open3d.t.geometry import RaycastingScene
@@ -12,10 +13,8 @@ class IsotropicRemesher:
         self.initial_surface = geometric_tools.scene_surface(model.vertices, model.triangles)
 
     def has_foldover_triangles(self, normals_pre, normals_pos, threshold=30):
-        normals = np.empty((2,3), dtype=np.float32)
-        for n0, n1 in zip(normals_pre, normals_pos):
-            normals[0, :], normals[1, :] = n0, n1
-            if vector_tools.angle(normals) > threshold:
+        for normals in zip(normals_pre, normals_pos):
+            if BiPoint.angle(normals, degree=True) > threshold:
                 return True
         return False
 
@@ -27,27 +26,42 @@ class IsotropicRemesher:
         v1_index, v2_index = self.model.get_vertex_indices(h5_index)
 
         vertices = self.model.get_vertices_by_indices([v1_index, v2_index, v3_index])
-        if vector_tools.are_collinear(vertices): return True
+        if TriPoint.is_collinear(vertices): return True
         
         vertices = self.model.get_vertices_by_indices([v0_index, v1_index, v3_index])
-        if vector_tools.are_collinear(vertices): return True
+        if TriPoint.is_collinear(vertices): return True
 
         return False
 
+    def vertex_ring(self, h_index:int) :
+        return map(lambda b: b.vertices[1], self.model.edge_ring(h_index))
+    
+    def vertex_index_ring(self, h_index:int) :
+        return map(self.model.get_end_vertex_index, self.model.one_ring(h_index))
+    
+    def normal_ring(self, h_index:int):
+        return map(lambda t: t.get_normal(), self.model.triangle_ring(h_index))
+    
+    def compactness_ring(self, h_index:int):
+        return map(lambda t: t.get_compactness(), self.model.triangle_ring(h_index))
+    
+    def normal(self, h_index: int) :
+        return TriPoint.normal(self.model.get_triangle_vertices_by_edge(h_index))
+    
     def has_small_edges(self, h_index:int, L_high:float):
         # check that new edges are smaller than high.
         v0_index = self.model.get_start_vertex_index(h_index)
         th_index = self.model.get_twin_index(h_index)
-        for vi in self.model.vertex_ring(th_index):
+        for vi in self.vertex_index_ring(th_index):
             vs = self.model.get_vertices_by_indices([vi, v0_index])
-            if vector_tools.distance(vs) > L_high:
+            if BiPoint.distance(vs) > L_high:
                 return False
         return True 
 
     def has_collapse_connectivity(self, h_index:int):
-        v0_ring = set(self.model.vertex_ring(h_index))
+        v0_ring = set(self.vertex_index_ring(h_index))
         th_index = self.model.get_twin_index(h_index)
-        v1_ring = set(self.model.vertex_ring(th_index))
+        v1_ring = set(self.vertex_index_ring(th_index))
         return len(v0_ring.intersection(v1_ring)) == 2
 
     def has_flip_connectivity(self, h0_index: int):
@@ -116,13 +130,13 @@ class IsotropicRemesher:
                 continue
 
             # Compute normals before collapse 
-            if foldover > 0: normals_pre = list(self.model.normal_ring(h3_index))[1:-1] # exclude f0 and f1
+            if foldover > 0: normals_pre = list(self.normal_ring(h3_index))[1:-1] # exclude f0 and f1
 
             p_ring = self.model.edge_collapse(h0_index)
 
             # Compute normals after collapse 
             if foldover > 0: 
-                normals_pos = map(self.model.triangle_normal, p_ring)
+                normals_pos = map(self.normal, p_ring)
                 if self.has_foldover_triangles(normals_pre, normals_pos, threshold=foldover):
                     self.model.revert_edge_collapse(p_ring)
                     continue
@@ -158,7 +172,7 @@ class IsotropicRemesher:
                 continue 
 
             # Compute normals before flip
-            if foldover > 0: normals_pre = ( self.model.triangle_normal(h0_index), self.model.triangle_normal(h3_index) )
+            if foldover > 0: normals_pre = ( self.normal(h0_index), self.normal(h3_index) )
 
             if sliver: deviation_compactness_pre = self.compactness_deviation(h0_index)
 
@@ -167,7 +181,7 @@ class IsotropicRemesher:
             self.model.edge_flip(h0_index)
             
             if foldover > 0:
-                normals_pos = ( self.model.triangle_normal(h0_index), self.model.triangle_normal(h3_index) )
+                normals_pos = ( self.normal(h0_index), self.normal(h3_index) )
 
                 if self.has_foldover_triangles(normals_pre, normals_pos, threshold=foldover):
                     self.model.edge_flip(h0_index)
@@ -248,13 +262,13 @@ class IsotropicRemesher:
         return Vector3dVector(projected_vertices)
     
     def tangential_smoothing(self, h_index:int):
-        n = self.model.vertex_normal(h_index)
-        q = self.model.mean_vertex(h_index)
+        n = np.mean(list(self.normal_ring(h_index)), axis=0)
+        q = np.mean(list(self.vertex_ring(h_index)), axis=0)
         v = self.model.get_start_vertex_by_edge(h_index)
         return q + np.inner(n, (v - q)) * n
 
     def compactness_deviation(self, h_index:int):
-        return sum([1-self.model.mean_compactness(i) for i in self.model.adjacent_half_edges(h_index)])
+        return sum([1.-np.mean(list(self.compactness_ring(i))) for i in self.model.adjacent_half_edges(h_index)])
 
     def valence_deviation(self, h_index:int):
         return sum([abs(self.model.valence(i)-6) for i in self.model.adjacent_half_edges(h_index)])
