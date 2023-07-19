@@ -68,6 +68,6 @@ In all cases ```L = .14```, ```iter = 10``` and the following surface as input:
 
 <img src="export/sphere_4.png" alt="drawing" width="400"/>
 
-**Case 4**: ```explicit = True```, ```foldover = 0``` and ```sliver = True```. The sliver parameter enhance the compactness of the triangles.
+**Case 5**: ```explicit = True```, ```foldover = 0``` and ```sliver = True```. The sliver parameter enhance the compactness of the triangles.
 
 <img src="export/sphere_5.png" alt="drawing" width="400"/>
