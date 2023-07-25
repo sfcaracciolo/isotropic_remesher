@@ -1,6 +1,6 @@
 # Isotropic Remesher
 
-A Python implementation of isometric remeshing algorithm based on Open3D library.
+A Python implementation of isotropic remeshing algorithm based on Open3D library.
 
 The basic idea is to iterate over these operations:
 
