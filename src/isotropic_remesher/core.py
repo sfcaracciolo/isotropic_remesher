@@ -1,4 +1,3 @@
-import statistics
 import numpy as np 
 from half_edge import HalfEdgeModel
 from vector_tools import BiPoint, TriPoint
