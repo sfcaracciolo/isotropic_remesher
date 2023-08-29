@@ -20,6 +20,6 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-  "geometric_tools git+https://github.com/sfcaracciolo/geometric_tools.git",
-  "half_edge git+https://github.com/sfcaracciolo/half_edge.git"
+  "geometric_tools @ git+https://github.com/sfcaracciolo/geometric_tools.git",
+  "half_edge @ git+https://github.com/sfcaracciolo/half_edge.git"
 ]
